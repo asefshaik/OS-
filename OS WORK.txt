@@ -1,0 +1,2428 @@
+//3. Program to Append Data into a File
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
+int main() {
+    char data[] = "This data will be appended to the file.\n";
+    int fileDescriptor;
+    fileDescriptor = open("file.txt", O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (fileDescriptor == -1) {
+        perror("open");
+        return 1;
+    }
+    write(fileDescriptor, data, strlen(data));
+    close(fileDescriptor);
+    return 0;
+}
+
+
+
+//Exercise 1: Write a C program to illustrate that performing 'n' consecutive fork() system calls generates a total of 2n − 1 child processes. The program should prompt the user to input the value of 'n'.
+
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+    int n, i;
+    pid_t pid;
+
+    printf("Enter the value of 'n': ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++) {
+        pid = fork();
+        if (pid == 0) {
+            printf("Child process created with PID: %d\n", getpid());
+            break;
+        }
+    }
+
+    if (pid > 0) {
+        printf("Parent process with PID: %d\n", getpid());
+    }
+
+    return 0;
+}
+
+
+//1. A C program that prints the contents of a directory using system calls like opendir, readdir, and closedir
+
+
+
+#include <stdio.h>
+#include <dirent.h>
+
+int main() {
+    DIR *dir;
+    struct dirent *entry;
+
+    dir = opendir(".");
+    if (dir) {
+        printf("Contents of the directory : \n");
+        while ((entry = readdir(dir)) != NULL) {
+            printf("%s \n", entry->d_name);
+        }
+        closedir(dir);
+    }
+    return 0;
+}
+
+
+
+//Write a program in C using system calls that lets users choose to copy either the first half or the second half of a file by entering 1 or 2.
+
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
+#define BUFFER_SIZE 1024
+
+int main() {
+    int sourceFd, destFd;
+    char buffer[BUFFER_SIZE];
+    char sourceFile[256], destFile[256];
+    int choice;
+
+    printf("Enter the source file name: ");
+    scanf("%s", sourceFile);
+
+    sourceFd = open(sourceFile, O_RDONLY);
+    if (sourceFd == -1) {
+        perror("open");
+        return 1;
+    }
+
+    printf("Enter 1 to copy the first half or 2 to copy the second half: ");
+    scanf("%d", &choice);
+
+    off_t fileSize = lseek(sourceFd, 0, SEEK_END);
+    off_t halfSize = fileSize / 2;
+
+    if (choice == 1) {
+        lseek(sourceFd, 0, SEEK_SET);
+    } else if (choice == 2) {
+        lseek(sourceFd, halfSize, SEEK_SET);
+    } else {
+        printf("Invalid choice\n");
+        close(sourceFd);
+        return 1;
+    }
+
+    printf("Enter the destination file name: ");
+    scanf("%s", destFile);
+
+    destFd = open(destFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (destFd == -1) {
+        perror("open");
+        close(sourceFd);
+        return 1;
+    }
+
+    ssize_t bytesRead;
+    while ((bytesRead = read(sourceFd, buffer, BUFFER_SIZE)) > 0) {
+        write(destFd, buffer, bytesRead);
+    }
+
+    close(sourceFd);
+    close(destFd);
+    return 0;
+}
+
+
+
+
+//Write a C program to create a new directory named "NewDirectory" within the file system:
+
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+int main() {
+    const char *dirname = "NewDirectory";
+
+    // Creating a new directory named "NewDirectory"
+    mkdir(dirname, 0777);
+
+    return 0;
+}
+
+
+
+
+//Exercise 1: Create a C program that prompts the user to enter a directory name and uses the mkdir system call to create the directory.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+int main() {
+    char dirname[100];
+    printf("Enter the directory name: ");
+    scanf("%s", dirname);
+    if (mkdir(dirname, 0755) == -1) {
+        perror("mkdir");
+        return 1;
+    }
+    printf("Directory '%s' created successfully.\n", dirname);
+    return 0;
+}
+
+
+
+
+
+//1. Program to Create and Open a File for Reading
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main() {
+    int fileDescriptor;
+    // Create a new file named "file.txt" and open it for reading
+    fileDescriptor = open("file.txt", O_CREAT | O_RDONLY, 0644);
+    if (fileDescriptor == -1) {
+        perror("open");
+        return 1;
+    }
+    close(fileDescriptor); // Close the file
+    return 0;
+}
+
+
+
+
+
+// A C program that creates a thread and passes a message from the main function to the thread:
+
+#include <stdio.h>
+#include <pthread.h>
+
+void* thread_function(void* message) {
+    printf("Message received in thread: %s\n", (char*) message);
+    return NULL;
+}
+
+int main() {
+    pthread_t thread_id;
+    pthread_create(&thread_id, NULL, thread_function, "Hello from the main thread!");
+    pthread_join(thread_id, NULL);
+    return 0;
+}
+
+
+
+
+
+
+
+//Exercise 4: Write a program that uses the getcwd system call to retrieve the current working directory and displays it to the user.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main() {
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        perror("getcwd");
+        return 1;
+    }
+    printf("Current working directory: %s\n", cwd);
+    return 0;
+}
+
+
+
+
+
+//xercise 3: Create a C program to delete a directory specified by the user using the rmdir system call.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+int main() {
+    char dirname[100];
+    printf("Enter the directory name to delete: ");
+    scanf("%s", dirname);
+    if (rmdir(dirname) == -1) {
+        perror("rmdir");
+        return 1;
+    }
+    printf("Directory '%s' deleted successfully.\n", dirname);
+    return 0;
+}
+
+
+
+
+
+
+//Q1 Create a C program that prompts the user to enter a directory name and uses system call to create the directory and inside that directory create 2 text files and 1 directory. Then open and read the directory and display the list of directory entries and delete the sub directory. (all should be done using system calls)
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
+
+int main() {
+    char dir_name[256];
+    printf("Enter a directory name: ");
+    scanf("%255s", dir_name);
+
+    // Create the directory using system call
+    char mkdir_cmd[256];
+    sprintf(mkdir_cmd, "mkdir %s", dir_name);
+    system(mkdir_cmd);
+
+    // Create 2 text files and 1 directory inside the created directory
+    char file1_cmd[256];
+    sprintf(file1_cmd, "touch %s/file1.txt", dir_name);
+    system(file1_cmd);
+
+    char file2_cmd[256];
+    sprintf(file2_cmd, "touch %s/file2.txt", dir_name);
+    system(file2_cmd);
+
+    char subdir_cmd[256];
+    sprintf(subdir_cmd, "mkdir %s/subdir", dir_name);
+    system(subdir_cmd);
+
+    // Open and read the directory using opendir and readdir system calls
+    DIR *dir;
+    struct dirent *ent;
+    dir = opendir(dir_name);
+    if (dir == NULL) {
+        printf("Unable to open directory\n");
+        return 1;
+    }
+
+    printf("Directory entries:\n");
+    while ((ent = readdir(dir))!= NULL) {
+        printf("%s\n", ent->d_name);
+    }
+
+    closedir(dir);
+
+    // Delete the sub directory using system call
+    char rmdir_cmd[256];
+    sprintf(rmdir_cmd, "rm -r %s/subdir", dir_name);
+    system(rmdir_cmd);
+
+    return 0;
+}
+
+
+
+
+//Directory Manupulation
+
+//Q1. Write a program using directory system calls, make a directory on desktop and create a file inside the directory and list the contents of the directory
+
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<dirent.h>
+
+int main()
+{
+	int a = mkdir("My_Directory",0777);
+	if(a!=-1)
+	{
+		printf("# You're directory has been created: \n");
+		printf(" \n");
+	}
+
+	struct dirent *dptr;
+		
+	int fd1 = creat("My_Directory/testing_123.txt",0777);
+	int fd2 = creat("My_Directory/noicee.txt",0777);
+	int fd3 = creat("My_Directory/life_is_good.txt",0777);
+	
+	if(fd1!=-1 && fd2!=-1 && fd3!=-1)
+	{
+		printf("* file testing_123.txt is created.\n");
+		printf("* noicee.txt is created.\n");
+		printf("* life_is_good.txt is created.\n");
+		printf(" \n");
+	}
+	
+	DIR *dp = opendir("My_Directory");
+	
+	printf("@ List of files in created directory: \n");
+	
+	while(NULL!=(dptr = readdir(dp)))
+	{
+		printf("%s\n", dptr->d_name);
+	}
+	return 0;
+}
+
+
+
+
+// Directory Manupulation
+
+//Q2. Write a program using directory and file manipulation system calls to copy the contents of one directory to a newly created directory
+
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<dirent.h>
+
+int main()
+{
+	struct dirent *dptr;
+	
+	int a = mkdir("My_Directory", 0777);
+	int b = mkdir("Your_Directory", 0777);
+	
+	if(a==0 && b==0){
+		printf("* Directories named 'My_Directory' and 'Your_Directory' has been created Successfully. \n");
+	}
+	else{
+		printf("* Either directories named 'My_Directory' & 'Your_Directory' already exist or they were not able to create due to any Error. \n");
+	}
+	
+	int fd1 = open("My_Directory/My_File.txt", O_CREAT|O_RDWR, 0777);
+	
+	printf("* File named 'My_File.txt' has been created Successfully in Directory named 'My_Directory'. \n");
+	printf(" \n");
+	
+	char c[1000];
+	
+	printf("# Kuch to likh de yaar file me, copy karani hai file: \n");
+	scanf("%[^\n]s", c);
+	printf(" \n");
+	
+	int size=0;
+	
+	for(int i=0;i<100;i++)
+	{
+		if(c[i]=='\0'){
+			break;
+		}
+		
+		else{
+			size++;
+		}
+	}
+	
+	write(fd1, c, size);
+	printf("@ Given input text from user has been Successfully copied in file named 'My_File.txt'. \n");
+	printf(" \n");
+	
+	DIR *dp = opendir("Your_Directory");
+	
+	int no_of_files=-2;
+	
+	while(NULL != (dptr=readdir(dp)))
+	{
+		no_of_files++;
+	}
+	
+	printf("# No. of files in directory which is named 'Your_Directory' are: \n");
+	printf("%d\n",no_of_files);
+	printf(" \n");
+	
+	int fd2 = open("Your_Directory/My_File_Copy.txt", O_CREAT | O_RDWR, 0777);
+	printf("* File named 'My_File_Copy.txt' has been created Successfully in Directory named 'Your_Directory'. \n");
+	
+	write(fd2, c, size);
+	printf("* Content of File named 'My_File' in Directory named 'My_Directory' has been Successfully Copied to file named 'My_File_Copy.txt' which is in Directory named 'Your_Directory' \n");
+	printf(" \n");
+	
+	// -----------------------------------------------------------------------------------------
+	
+	DIR *dp1 = opendir("Your_Directory");
+	
+	int new_no_of_files=-2;
+	
+	while(NULL != (dptr=readdir(dp1)))
+	{
+		new_no_of_files++;	
+	}
+	
+	printf("# Now no. of files in directory which is named 'Your_Directory' are: \n");
+	printf("%d\n", new_no_of_files);
+	printf(" \n");
+	
+	return 0;
+}
+
+
+
+
+//Write a C program that encrypts a text file using a simple encryption technique and saves the encrypted content to a new file.
+
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
+#define BUFFER_SIZE 1024
+
+int main() {
+    int sourceFd, destFd;
+    char buffer[BUFFER_SIZE];
+    char sourceFile[256], destFile[256];
+
+    printf("Enter the source file name: ");
+    scanf("%s", sourceFile);
+
+    sourceFd = open(sourceFile, O_RDONLY);
+    if (sourceFd == -1) {
+        perror("open");
+        return 1;
+    }
+
+    printf("Enter the destination file name: ");
+    scanf("%s", destFile);
+
+    destFd = open(destFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (destFd == -1) {
+        perror("open");
+        close(sourceFd);
+        return 1;
+    }
+
+    ssize_t bytesRead;
+    while ((bytesRead = read(sourceFd, buffer, BUFFER_SIZE)) > 0) {
+        for (int i = 0; i < bytesRead; i++) {
+            buffer[i] += 3; // Simple encryption: add 3 to each character
+        }
+        write(destFd, buffer, bytesRead);
+    }
+
+    close(sourceFd);
+    close(destFd);
+    return 0;
+}
+
+
+
+
+//Q7 Write a script in Linux with C that defines a function to calculate the factorial of a user given number ?
+
+
+#include <stdio.h>
+
+long long int factorial(int num) {
+    if (num == 0) {
+        return 1;
+    }
+    return num * factorial(num - 1);
+}
+
+int main() {
+    int num;
+    printf("Enter a number: ");
+    scanf("%d", &num);
+
+    long long int result = factorial(num);
+    printf("Factorial of %d is %lld\n", num, result);
+
+    return 0;
+}
+
+
+
+
+
+//File Manupulation
+
+//Q2. Using system calls write a program which reads from console until user types '$' and the content which is written on the console before '$' copy that content to a newly created file
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+int main(){
+	int a, b=0;
+	char buff1[500];
+	scanf("%[^\n]s", buff1);
+	
+	a = open("Output$.txt", O_WRONLY | O_CREAT, 0777);
+	
+	for(int i=0; i<500; i++){
+		if(buff1[i] == '$'){
+			printf("You can not write after '$' Symbol \n");
+			break;
+		}
+		
+		else{
+			b++;
+		}
+	}
+	
+	char buff2[b];
+	
+	for(int i=0; i<b; i++){
+		buff2[i]=buff1[i];
+	}
+	
+	write(a, buff2, b);
+	return 0;
+}
+
+
+
+
+
+//File Manupulation
+
+//Q3. Write a program using system call to read the contents of a file without using char array and display the contents on the console (Don't use any built in functions like sizeof() and strlen())
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+int main(){
+	int a, b;
+	a = open("Input.txt", O_RDONLY | O_CREAT, 0777);
+	char buff[1];
+	char *c = buff;
+	
+	while((b = read(a, c, 1))>0){
+		write(1, c, 1);
+	}
+	
+	return 0;
+}
+
+
+
+
+//File Manipulation Using System Calls 
+//Q1. Using system calls copy first half of the content of a already existing file to a newly created file and then again copy the rest remaining second half of the content of that older file to a another newly created file
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+int main(){
+	int a, b, c, n;
+	char buff1[500];
+	
+	a = open("content.txt", O_RDONLY | O_CREAT, 0777);
+	b = open("FirstHalf.txt", O_WRONLY | O_CREAT, 0777);
+	c = open("SecondHalf.txt", O_WRONLY | O_CREAT, 0777);
+	
+	n = read(a, buff1, 500);
+	
+	read(a, buff1, n/2);
+	write(b, buff1, n/2);
+	
+	lseek(a, n/2, SEEK_SET);
+	read(a, buff1, n/2);
+	write(c, buff1, n/2);
+	
+	return 0;
+}
+
+
+
+
+
+//Q10 Write a c program and use system calls : 1.Create a folder and inside it create 3 more folders. and my section 2.Create two file inside the parent folder and write to it. ("Hello my name is ) and on the second file write ("My section and roll no. Is ") is Now create a child process where child merges the two file into a third file and parent overwrites the first file with the statement ("This file has been overwritten by your name") Keep directory names as - d1, d2, d3, d4 And file names as - f1, f2, f3.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define MAX_LEN 100
+
+int main() {
+    // Create parent directory
+    if (mkdir("d1", 0777) == -1) {
+        perror("mkdir");
+        exit(1);
+    }
+
+    // Create child directories
+    if (chdir("d1") == -1) {
+        perror("chdir");
+        exit(1);
+    }
+
+    if (mkdir("d2", 0777) == -1 || mkdir("d3", 0777) == -1 || mkdir("d4", 0777) == -1) {
+        perror("mkdir");
+        exit(1);
+    }
+
+    // Create and write to files
+    if (open("f1", O_CREAT | O_WRONLY, 0777) == -1) {
+        perror("open");
+        exit(1);
+    }
+
+    if (write(1, "Hello my name is ", 16) == -1 || write(1, "attimo\n", 6) == -1) {
+        perror("write");
+        exit(1);
+    }
+
+    if (open("f2", O_CREAT | O_WRONLY, 0777) == -1) {
+        perror("open");
+        exit(1);
+
+
+
+//Exercise 2: Write a C program utilizing the fork() system call to generate the following process hierarchy: P1 → P2 → P3. The program should display the Process ID (PID) and Parent Process IDs (PPID) for each process created.
+
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+    pid_t pid1, pid2;
+
+    pid1 = fork();
+
+    if (pid1 == 0) {
+        printf("P2: PID = %d, PPID = %d\n", getpid(), getppid());
+        pid2 = fork();
+
+        if (pid2 == 0) {
+            printf("P3: PID = %d, PPID = %d\n", getpid(), getppid());
+        }
+    } else {
+        printf("P1: PID = %d, PPID = %d\n", getpid(), getppid());
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+//Exercise 2: Demonstrate the usage of Shared Memory for IPC.
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+#define SHM_KEY 1234
+#define SHM_SIZE 100
+
+int main() {
+    int shm_id;
+    char *shm_ptr;
+
+    shm_id = shmget(SHM_KEY, SHM_SIZE, IPC_CREAT | 0666);
+    shm_ptr = (char *)shmat(shm_id, NULL, 0);
+
+    sprintf(shm_ptr, "Hello, World!");
+
+    shmdt(shm_ptr);
+    shmctl(shm_id, IPC_RMID, NULL);
+
+    return 0;
+}
+
+
+
+//Q3 Wrie a C program to perform IPC using RPC.
+
+#include <stdio.h>
+#include "add.h"
+
+void main() {
+    CLIENT *clnt;
+    int *result, x = 3, y = 4;
+
+    clnt = clnt_create("localhost", ADDPROG, ADDVERS, "udp");
+    if (clnt == NULL) {
+        clnt_pcreateerror(ADDPROG);
+        exit(1);
+    }
+
+    result = add_1(&x, &y, clnt);
+    if (result == NULL) {
+        clnt_perror(clnt, "call failed");
+    } else {
+        printf("Result: %d\n", *result);
+    }
+
+    clnt_destroy(clnt);
+}
+
+
+
+
+//Establish Interprocess communication (IPC) between Parent and child process using unnamed pipe.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+
+int main() {
+	int pipefd[2]; // file descriptors for the pipe
+	char buffer[25];
+	pid_t pid;
+
+	if (pipe(pipefd) == -1) { // create the pipe
+    	printf("Pipe failed\n");
+    	return 1;
+	}
+
+	pid = fork(); // create a child process
+
+	if (pid < 0) { // fork failed
+    	printf("Fork failed\n");
+    	return 1;
+	}
+
+	if (pid > 0) { // parent process
+    	close(pipefd[0]); // close the read end of the pipe
+    	printf("Parent process writing to pipe...\n");
+    	write(pipefd[1], "Hello, child process!", 22);
+    	close(pipefd[1]); // close the write end of the pipe
+	}
+	else { // child process
+    	close(pipefd[1]); // close the write end of the pipe
+    	printf("Child process reading from pipe...\n");
+    	read(pipefd[0], buffer, 25);
+    	printf("Child process received: %s\n", buffer);
+    	close(pipefd[0]); // close the read end of the pipe
+	}
+
+	return 0;
+}
+
+
+
+
+//Establish Interprocess communication (IPC) between Parent and child process using named pipe.
+
+#include <sys/types.h> 
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
+
+int main(){
+
+	int pid, fd1, fd2;
+	char buffer[20];
+	
+	mkfifo("my_Pipe", 0666); 
+	
+	pid=fork();
+	if(pid > 0){
+		//Parent Section
+		fd1=open("my_Pipe", O_WRONLY); 
+		write(fd1, "Hello Child Process\n",20);
+	}
+	if(pid==0){
+		//Child section
+		fd2=open("my_Pipe", O_RDONLY);
+		read(fd2, buffer, 20);
+		printf("%s", buffer);
+	}
+	
+	return 0;
+}
+
+
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+struct my_msg {
+    long int msg_type;
+    char some_text[BUFSIZ];
+};
+
+int main() {
+    int running = 1;
+    int msgid;
+    struct my_msg some_data;
+    long int msg_to_receive = 0;
+
+    msgid = msgget((key_t)12345, 0666 | IPC_CREAT);
+
+    while (running) {
+        msgrcv(msgid, (void*)&some_data, BUFSIZ, msg_to_receive, 0);
+        printf("Data received: %s\n", some_data.some_text);
+
+        if (strncmp(some_data.some_text, "end", 3) == 0) {
+            running = 0;
+        }
+    }
+
+    msgctl(msgid, IPC_RMID, 0);
+
+    return 0;
+}
+
+
+
+
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+#define MAX_TEXT 512 // maximum length of the message that can be sent allowed
+
+struct my_msg {
+    long int msg_type;
+    char some_text[MAX_TEXT];
+};
+
+int main() {
+    int running = 1;
+    int msgid;
+    struct my_msg some_data;
+    char buffer[50]; // array to store user input
+
+    msgid = msgget((key_t)14534, 0666 | IPC_CREAT);
+    if (msgid == -1) { // -1 means the message queue is not created
+        printf("Error in creating queue\n");
+        exit(0);
+    }
+
+    while (running) {
+        printf("Enter some text:\n");
+        fgets(buffer, 50, stdin);
+        some_data.msg_type = 1;
+        strcpy(some_data.some_text, buffer);
+        if (msgsnd(msgid, (void*)&some_data, MAX_TEXT, 0) == -1) // msgsnd returns -1 if the message is not sent
+        {
+            printf("Msg not sent\n");
+        }
+        if (strncmp(buffer, "end", 3) == 0) {
+            running = 0;
+        }
+    }
+
+    return 0;
+}
+
+
+
+
+//Exercise 2: Write a program that opens the current directory using opendir and reads its contents using readdir, then displays the list of directory entries.
+
+#include <dirent.h>
+#include <stdio.h>
+#include <sys/types.h>
+
+int main() {
+    DIR *dir;
+    struct dirent *entry;
+    dir = opendir(".");
+    if (dir == NULL) {
+        perror("opendir");
+        return 1;
+    }
+    printf("Contents of the current directory:\n");
+    while ((entry = readdir(dir)) != NULL) {
+        printf("%s\n", entry->d_name);
+    }
+    closedir(dir);
+    return 0;
+}
+
+
+
+//5. Program to Read Characters from a File using lseek
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 11
+
+int main() {
+    int fileDescriptor;
+    char buffer[BUFFER_SIZE];
+    fileDescriptor = open("input.txt", O_RDONLY);
+    if (fileDescriptor == -1) {
+        perror("open");
+        return 1;
+    }
+    if (lseek(fileDescriptor, 10, SEEK_SET) == -1) {
+        perror("lseek");
+        close(fileDescriptor);
+        return 1;
+    }
+    read(fileDescriptor, buffer, BUFFER_SIZE - 1);
+    buffer[BUFFER_SIZE - 1] = '\0';
+    printf("Characters from 11th to 20th position: %s\n", buffer);
+    close(fileDescriptor);
+    return 0;
+}
+
+
+
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main() {
+    int n, f;
+    char buff[10];
+
+    f = open("seeking", O_RDWR);
+    if (f == -1) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    // Read the first 10 characters and print them
+    n = read(f, buff, 10);
+    if (n == -1) {
+        perror("Error reading from file");
+        return 1;
+    }
+    write(1, buff, 10);
+
+    // Move the file pointer to the beginning of the file using lseek()
+    lseek(f, 0, SEEK_SET);
+
+    // Read another 10 characters and print them
+    n = read(f, buff, 10);
+    if (n == -1) {
+        perror("Error reading from file");
+        return 1;
+    }
+    write(1, buff, 10);
+
+    close(f);
+    return 0;
+}
+
+
+
+
+
+//Here is the C program that uses the lseek() system call to read 10 characters from the file "seeking" and print them on the screen, then read another 10 characters and print them on the screen:
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main() {
+    int n, f;
+    char buff[10];
+
+    f = open("seeking", O_RDWR);
+    if (f == -1) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    // Read the first 10 characters and print them
+    n = read(f, buff, 10);
+    if (n == -1) {
+        perror("Error reading from file");
+        return 1;
+    }
+    write(1, buff, 10);
+
+    // Move the file pointer to the beginning of the file using lseek()
+    lseek(f, 0, SEEK_SET);
+
+    // Read another 10 characters and print them
+    n = read(f, buff, 10);
+    if (n == -1) {
+        perror("Error reading from file");
+        return 1;
+    }
+    write(1, buff, 10);
+
+    close(f);
+    return 0;
+}
+
+
+
+
+
+
+//Here is the C program that uses the lseek() system call to read 10 characters from the file "seeking", print them on the screen, skip the next 5 characters, read another 10 characters, and write them to the screen:
+
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main() {
+    int n, f;
+    char buff[10];
+
+    f = open("seeking", O_RDWR);
+    if (f == -1) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    // Read the first 10 characters and print them
+    n = read(f, buff, 10);
+    if (n == -1) {
+        perror("Error reading from file");
+        return 1;
+    }
+    write(1, buff, 10);
+
+    // Move the file pointer forward by 5 characters
+    lseek(f, 5, SEEK_CUR); // skips 5 characters from the current position
+
+    // Read the next 10 characters and print them
+    n = read(f, buff, 10);
+    if (n == -1) {
+        perror("Error reading from file");
+        return 1;
+    }
+    write(1, buff, 10);
+
+    close(f);
+    return 0;
+}
+
+
+
+
+//Q1. Write a program using pthread to concatenate the strings, where multiple strings are passed to thread function
+
+#include<stdio.h>
+#include<unistd.h>
+#include<pthread.h>
+#include<string.h>
+
+
+char str1[100], str2[100];
+char result[1000];
+
+
+void *concatenatestrings(){
+	strcat(result, str1);
+	strcat(result, str2);
+	pthread_exit(NULL);
+}
+
+int main(){
+	pthread_t thread;
+	printf("* Enter the first string: ");
+	scanf("%s", str1);
+	printf("* Enter the second string: ");
+	scanf("%s", str2);
+	
+	pthread_create(&thread, NULL, concatenatestrings, NULL);
+	pthread_join(thread, NULL);
+	
+	printf("@ Final result is: %s \n", result);
+	return 0;
+}
+
+
+
+
+
+
+//Q2. Write a program using pthread to find the length of string, where strings are passed to thread function
+
+#include<stdio.h>
+#include<unistd.h>
+#include<pthread.h>
+#include<string.h>
+
+char length1[100];
+int length=0;
+
+void *lengthstr(){
+	length=strlen(length1);
+	pthread_exit(NULL);
+}
+
+
+int main(){
+	pthread_t thread;
+	printf("* Enter the String: ");
+	scanf("%[^\n]s", length1);
+	
+	pthread_create(&thread, NULL, lengthstr, NULL);
+	pthread_join(thread, NULL);
+	printf("* Total length of string is: %d \n", length);
+	return 0;
+}
+
+
+
+
+//Q3. Write a program that performs statistical operations of calculating the average, maximum & minimum for a set of numbers. Create three threads where each performs their respective operations.
+
+#include<stdio.h>
+#include<pthread.h>
+
+int arr[10] = {99, 22, 00, 88, 11, 102, 33, 66, 44, 55};
+
+void *sort(){
+	for(int i=0; i<10; i++){
+		for(int j=0; j<10; j++){
+			if(arr[i] < arr[j]){
+				int temp = arr[i];
+				arr[i] = arr[j];
+				arr[j] = temp;
+			}
+		}
+	}
+}
+
+
+void *min(){
+	int min = arr[0];
+	printf("* Minimum element is = %d\n", min);
+	pthread_exit(NULL);
+}
+
+
+void *max(){
+	int max = arr[9];
+	printf("* Maximum element is = %d \n", max);
+	pthread_exit(NULL);
+}
+
+
+void *avg(){
+	int sum=0;
+	for(int i=0;i<10;i++)
+	{
+		sum = sum + arr[i];
+	}
+	sum = sum/10;
+	
+	printf("* The average of the elements = %d \n", sum);
+	printf("\n");
+	pthread_exit(NULL);
+}
+
+
+int main(){
+
+	printf("\n");		
+	
+	/* 
+	printf("Enter 10 elements in the array: ");
+	for(int i=0; i<10; i++)
+	{
+		scanf("%d", &arr[i]);
+	}
+	printf("\n");
+	*/
+	
+	printf("# Initial input array is: ");
+	for(int i=0; i<10; i++){
+		printf("%d ", arr[i]);
+	}
+	printf("\n");
+	
+	
+	pthread_t sort_thread, max_thread, min_thread, avg_thread;
+	
+	pthread_create(&sort_thread, NULL, sort, NULL);
+	pthread_join(sort_thread, NULL);
+	
+	pthread_create(&max_thread, NULL, max, NULL);
+	pthread_join(max_thread, NULL);
+	
+	pthread_create(&min_thread, NULL, min, NULL);
+	pthread_join(min_thread, NULL);
+	
+	pthread_create(&avg_thread, NULL, avg, NULL);
+	pthread_join(avg_thread, NULL);
+	return 0;
+}
+
+
+
+
+//Q4. Write a multithreaded program where an array of integers is passed globally and is divided into two smaller lits and given as input to two threads. The thread will sort their half of the list and will pass the sorted list to a third thread which merges and sorts the list. The final sorted list is printed by the parent thread.
+
+#include<stdio.h>
+#include<pthread.h>
+
+int arr[10] = {99, 22, 00, 88, 11, 100, 33, 66, 44, 55};
+
+
+int arr_first_half[5], arr_second_half[5], final_arr[10];
+
+
+void *final_merge_sort(){
+
+	for(int i=0; i<5; i++){
+		final_arr[i] = arr_first_half[i];
+		final_arr[i+5] = arr_second_half[i];
+	}
+	
+	printf("# Merged array is: ");
+	for(int i=0; i<10; i++){
+		printf("%d ", final_arr[i]);
+	}
+	printf("\n");
+	
+	for(int i=0; i<10; i++){
+		for(int j=0; j<10; j++){
+			if(final_arr[i] < final_arr[j]){
+				int temp = final_arr[i];
+				final_arr[i] = final_arr[j];
+				final_arr[j] = temp;
+			}
+		}
+	}
+
+	printf("@ Final Merged & Sorted array is: ");
+	for(int i=0; i<10; i++){
+		printf("%d ", final_arr[i]);
+	}
+	printf("\n");
+	printf("\n");
+
+	pthread_exit(NULL);
+}
+
+
+void *individual_sort(){
+	for(int i=0; i<5; i++){
+		for(int j=0; j<5; j++){
+			if(arr_first_half[i] < arr_first_half[j]){
+				int temp = arr_first_half[i];
+				arr_first_half[i] = arr_first_half[j];
+				arr_first_half[j] = temp;
+			}
+			if(arr_second_half[i] < arr_second_half[j]){
+				int temp = arr_second_half[i];
+				arr_second_half[i] = arr_second_half[j];
+				arr_second_half[j] = temp;	
+			}
+		}
+	}
+		
+	pthread_exit(NULL);
+}
+
+
+int main()
+{
+	printf("\n");		
+	
+	/* 
+	printf("Enter 10 elements in the array: ");
+	for(int i=0; i<10; i++)
+	{
+		scanf("%d", &arr[i]);
+	}
+	printf("\n");
+	*/
+		
+	printf("# Initial input array is: ");
+	for(int i=0; i<10; i++){
+		printf("%d ", arr[i]);
+	}
+	printf("\n");
+
+	
+	for(int i=0; i<5; i++){
+		arr_first_half[i] = arr[i];
+		arr_second_half[i] = arr[i+5];
+	}
+	
+	
+	
+	pthread_t parent_thread;
+	pthread_create(&parent_thread, NULL, individual_sort, NULL);
+	pthread_join(parent_thread, NULL);
+	
+	printf("* First half sorted array is: ");
+	for(int i=0; i<5; i++){
+		printf("%d ", arr_first_half[i]);
+	}
+	printf("\n");
+	
+	
+	printf("* Second half sorted array is: ");
+	for(int i=0; i<5; i++){
+		printf("%d ", arr_second_half[i]);
+	}
+	printf("\n");
+	
+	pthread_create(&parent_thread, NULL, final_merge_sort, NULL);
+	pthread_join(parent_thread, NULL);
+	
+	return 0;
+}
+
+
+
+
+
+// Open() system call to read the first 10 character
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+int main() {
+    int n, fd;
+    char buffer[50];
+
+    fd = open("test.txt", O_RDONLY); // opens test.txt in read mode and saves the file descriptor in integer fd
+    if (fd == -1) {
+        perror("Error opening the file");
+        return 1;
+    }
+
+    printf("The file descriptor of the file is: %d\n", fd); // prints the file descriptor value
+
+    n = read(fd, buffer, 10); // reads 10 characters from the file pointed to by file descriptor fd and saves them in buffer
+    if (n == -1) {
+        perror("Error reading from file");
+        return 1;
+    }
+
+    write(1, buffer, n); // writes to the screen from the buffer
+    close(fd); // closes the file descriptor
+
+    return 0;
+}
+
+
+
+
+
+//C program to demonstrates the creation of an orphan process:
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int main() {
+    pid_t child_pid = fork();
+
+    if (child_pid == 0) {
+        // Child process
+        printf("Child process : PID = %d\n", getpid());
+        sleep(2); // Sleep to ensure the parent process terminates first
+        printf("Child process : My parent's PID = %d\n", getppid());
+    } else if (child_pid > 0) {
+        // Parent process
+        printf("Parent process : PID = %d\n", getpid());
+        printf("Parent process : Terminating . . . \n");
+    } else {
+        printf("Fork failed\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+
+
+//Process Management
+
+//Q1. Write a program using system calls for operation on process to stimulate n fork calls to create (2n−12n−1﻿) child processes
+
+#include<stdio.h>              // for printf and scanf
+#include<unistd.h>             // for fork() & getpid()
+#include<sys/types.h>          // for fork() & getpid()
+
+int main(){
+	
+	int n;
+	
+	printf("# Enter the no. of times you want to run the fork system call: ");
+	scanf("%d", &n);
+	
+	for(int i=0; i<n; i++){
+		pid_t r;
+		r = fork();
+		if(r==0){
+			printf("Current child process pid is %d \n", getpid());
+		}
+	}
+
+	return 0;
+}
+
+
+
+
+//Process Management
+
+//Q1. Write a program using system calls for operation on process to stimulate n fork calls to create (2n−12n−1﻿) child processes
+
+#include<stdio.h>              // for printf and scanf
+#include<unistd.h>             // for fork() & getpid()
+#include<sys/types.h>          // for fork() & getpid()
+
+int main(){
+	
+	int n;
+	
+	printf("# Enter the no. of times you want to run the fork system call: ");
+	scanf("%d", &n);
+	
+	for(int i=0; i<n; i++){
+		pid_t r;
+		r = fork();
+		if(r==0){
+			printf("Current child process pid is %d \n", getpid());
+		}
+	}
+
+	return 0;
+}
+
+
+
+
+//Process Management
+
+//Q2. Write a program using system calls for operations on processes to create a heirarchy of processes P1 -> P2 -> P3, also print the id and parent id for each process
+
+#include<stdio.h>             //  for printf and scanf 
+#include<unistd.h>            //  for fork(), getpid() & getppid() 
+#include<sys/types.h>         //  for fork(), getpid() & getppid() 
+#include <stdlib.h>           //  for exit() 
+
+int main()
+{
+	printf("Parent PID : %d \n", (int) getpid());
+	
+	pid_t pid = fork();
+	
+	if(pid == 0)
+	{
+		printf("Child 1 PID : %d Parent PID : %d\n", (int) getpid(), (int) getppid());
+		pid_t pid_1 = fork();
+		if(pid_1 == 0)
+		{
+			printf("Child 2 PID : %d Parent PID (Child 1) : %d \n", (int) getpid(), (int) getppid());
+			exit(0);
+		}
+		else
+		{
+			exit(0);
+		}
+	}
+	else
+	{
+		exit(0);	
+	}
+	
+	return 0;
+}
+
+
+
+
+//Process Management 
+
+//Q3. Write a program using system calls for operations on processes to create a heirarchy of processes: P3 <- P2 <- P1 -> P4 -> P5, also stimulate process P4 as orphan and P5 as zombie
+
+
+
+
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<stdlib.h>
+
+int main()
+{
+	printf("P1 PID : %d \n", (int) getpid());
+	pid_t pid = fork();
+
+	if(pid == 0)
+	{
+		printf("P4 PID : %d P1 PID : %d\n", (int) getpid(), (int) getppid());
+		printf("Child process P4 is sleeping \n");
+		pid_t pid_1 = fork();
+		sleep(5);
+		if(pid_1 == 0)
+		{
+			printf("P5 PID : %d P4 PID : %d \n", (int) getpid(), (int) getppid());
+			printf("Zombie process P5's PID : %d \n", (int) getpid());
+		}
+		else{
+			printf("Orphan child process P4's PID : %d \n", (int) getpid());
+			printf("P4's New Parent PID : %d \n", (int) getppid());
+		}
+	}
+	else
+	{
+		pid = fork();
+		if(pid == 0)
+		{
+			printf("P2 PID : %d P1 PID : %d\n", (int) getpid(), (int) getppid());
+			pid_t pid_1 = fork();
+			if(pid_1 == 0)
+			{
+				printf("P3 PID : %d P2 PID : %d \n", (int) getpid(), (int) getppid());
+				exit(0);
+			}
+			else
+			{
+				exit(0);
+			}
+		}
+		else
+		{
+			exit(0);
+		}
+	}
+
+	return 0;
+}
+
+
+
+
+
+//Process Management
+
+//Q4. Write a program using system calls for operations on processes to create a heirarchy of processes: P4 <- P3 <- P2 <- P1 -> P5 -> P6 -> P7, also stimulate process P4 as an orphan process and P7 as zombie process
+
+#include<stdio.h>               //  for printf and scanf 
+#include<unistd.h>              //  for fork(), getpid(), sleep() & getppid() 
+#include<sys/types.h>           //  for fork(), getpid() & getppid() 
+#include<stdlib.h>              //  for exit() 
+
+int main()
+{
+	printf("P1 PID : %d \n", (int) getpid());
+
+	pid_t pid = fork();
+
+	if(pid == 0)
+	{
+		printf("P5 PID : %d Parent P1 PID : %d\n", (int) getpid(), (int) getppid());
+		pid_t pid_1 = fork();
+		if(pid_1 == 0)
+		{
+			printf("P6 PID : %d Parent P5 PID : %d \n", (int) getpid(), (int) getppid());
+
+			pid_t pid_2 = fork();
+			sleep(5);
+
+			if(pid_2 == 0)
+			{
+				printf("Zombie process P7's PID: %d \n", (int) getpid());
+				printf("Parent P6 PID : %d \n", (int) getppid());
+			}
+			else
+			{
+				exit(0);
+			}
+		}
+		else
+		{
+			exit(0);
+		}
+	}
+
+	else
+	{
+		pid = fork();
+		if(pid == 0)
+		{
+			printf("P2 PID : %d Parent P1 PID : %d\n", (int) getpid(), (int) getppid());
+			pid_t pid_1 = fork();
+			if(pid_1 == 0)
+			{
+				printf("P3 PID : %d Parent P2 PID : %d \n", (int) getpid(), (int) getppid());
+
+				pid_t pid_2 = fork();
+				if(pid_2 == 0)
+				{
+					sleep(3);
+				}
+				else
+				{
+					printf("Orphan child process P4's PID : %d \n", (int) pid_2);
+					printf("P4's New Parent PID : %d \n", (int) getppid());
+				}
+			}
+			else
+			{
+				exit(0);
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+
+
+//Producer & Consumer Using Mutex
+
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <pthread.h> 
+
+
+int BUFFER_SIZE = 5; 
+int buffer[5]; 
+int count = 0; 
+int last_consumed_index = 0; 
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
+pthread_cond_t cond_producer = PTHREAD_COND_INITIALIZER; 
+pthread_cond_t cond_consumer = PTHREAD_COND_INITIALIZER; 
+
+void* producer(void* arg) {
+    int item;
+    int iterations = 0;
+    while (iterations < 10) { // exit after 10 iterations
+        item = rand() % 100; // generate a random item
+        pthread_mutex_lock(&mutex);
+        if (count == BUFFER_SIZE) {
+            pthread_cond_wait(&cond_producer, &mutex);
+        }
+        if (count == 0) {
+            last_consumed_index = 0; // reset last consumed index if buffer is empty
+        }
+        buffer[last_consumed_index++] = item;
+        printf("Produced item: %d\n", item);
+        count++;
+        if (count == 1) {
+            pthread_cond_signal(&cond_consumer);
+        }
+        pthread_mutex_unlock(&mutex);
+        iterations++;
+    }
+    return NULL;
+}
+
+void* consumer(void* arg) {
+    int item;
+    int iterations = 0;
+    while (iterations < 10) { // exit after 10 iterations
+        pthread_mutex_lock(&mutex);
+        if (count == 0) {
+            pthread_cond_wait(&cond_consumer, &mutex);
+        }
+        item = buffer[--last_consumed_index];
+        printf("Consumed item: %d\n", item);
+        count--;
+        if (count == BUFFER_SIZE - 1) {
+            pthread_cond_signal(&cond_producer);
+        }
+        pthread_mutex_unlock(&mutex);
+        iterations++;
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t producer_thread, consumer_thread;
+    srand(time(NULL)); // initialize the random seed
+
+    pthread_create(&producer_thread, NULL, producer, NULL);
+    pthread_create(&consumer_thread, NULL, consumer, NULL);
+
+    pthread_join(producer_thread, NULL);
+    pthread_join(consumer_thread, NULL);
+
+    return 0;
+}
+
+
+
+//Exercise 2: Create a pthread program to find the length of strings passed to the thread function.
+
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
+
+void *find_string_length(void *arg) {
+    char *string = (char *)arg;
+    int len = strlen(string);
+    return (void *)&len;
+}
+
+int main() {
+    char *string = "Hello, World!";
+    pthread_t thread_id;
+    void *result;
+    pthread_create(&thread_id, NULL, find_string_length, string);
+    pthread_join(thread_id, &result);
+    printf("Length of the string: %d\n", *((int *)result));
+    return 0;
+}
+
+
+
+
+
+//Race Condition
+
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int NUM_THREADS = 2;
+int shared = 0;
+
+void *thread_func(void *arg) {
+	int id = *(int *) arg;
+	int local = 0;
+
+	for (int i = 0; i < 1000000; i++) {
+    	local = shared;
+    	local++;
+    	shared = local;
+	}
+
+	printf("Thread %d: shared = %d\n", id, shared);
+
+	pthread_exit(NULL);
+}
+
+int main() {
+	pthread_t threads[NUM_THREADS];
+	int thread_ids[NUM_THREADS];
+
+	for (int i = 0; i < NUM_THREADS; i++) {
+    	thread_ids[i] = i;
+    	pthread_create(&threads[i], NULL, thread_func, (void *) &thread_ids[i]);
+	}
+
+	for (int i = 0; i < NUM_THREADS; i++) {
+    	pthread_join(threads[i], NULL);
+	}
+
+	printf("Final value of shared = %d\n", shared);
+
+	return 0;
+}
+
+
+
+
+//Race Around Condition Solved Using Mutex
+
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int NUM_THREADS = 2;
+int shared = 0;
+
+pthread_mutex_t mutex;
+
+void *thread_func(void *arg) {
+    int id = *(int *) arg;
+    int local = 0;
+    pthread_mutex_lock(&mutex);
+    for (int i = 0; i < 1000000; i++) {
+   	 local = shared;
+   	 local++;
+   	 shared = local;
+    }
+    printf("Thread %d: shared = %d\n", id, shared);
+    pthread_mutex_unlock(&mutex);
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+    int thread_ids[NUM_THREADS];
+    pthread_mutex_init(&mutex,NULL);
+    for (int i = 0; i < NUM_THREADS; i++) {
+   	 thread_ids[i] = i;
+   	 pthread_create(&threads[i], NULL, thread_func, (void *) &thread_ids[i]);
+    }
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+   	 pthread_join(threads[i], NULL);
+    }
+
+    printf("Final value of shared = %d\n", shared);
+
+    return 0;
+}
+
+
+
+
+
+//Race Around Condition Solved Using Semaphore:
+
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <semaphore.h>
+
+
+int NUM_THREADS = 2;
+int shared = 0;
+
+sem_t semaphore;
+
+void *thread_func(void *arg) {
+    int id = *(int *) arg;
+    int local = 0;
+    sem_wait(&semaphore);
+    for (int i = 0; i < 1000000; i++) {
+   	 local = shared;
+   	 local++;
+   	 shared = local;
+    }
+    printf("Thread %d: shared = %d\n", id, shared);
+    sem_post(&semaphore);
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+    int thread_ids[NUM_THREADS];
+    sem_init(&semaphore,0,1);
+    for (int i = 0; i < NUM_THREADS; i++) {
+   	 thread_ids[i] = i;
+   	 pthread_create(&threads[i], NULL, thread_func, (void *) &thread_ids[i]);
+    }
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+   	 pthread_join(threads[i], NULL);
+    }
+
+    printf("Final value of shared = %d\n", shared);
+    sem_destroy(&semaphore);
+    return 0;
+}
+
+
+
+
+//Here is the C program that reads the first 10 characters from the file "test.txt" and writes them into a non-existing file "towrite.txt":
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+int main() {
+    int n, fd, fd1;
+    char buffer[50];
+
+    fd = open("test.txt", O_RDONLY);
+    n = read(fd, buffer, 10);
+
+    fd1 = open("towrite.txt", O_WRONLY | O_CREAT, 0642);
+    // Use the pipe symbol (|) to separate O_WRONLY and O_CREAT
+
+    write(fd1, buffer, n);
+
+    return 0;
+}
+
+
+
+
+//Reader Writer Problem using Semaphore:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+int NUM_READERS = 3;
+int NUM_WRITERS = 2;
+int MAX_ATTEMPTS = 5;
+
+// Shared data
+int shared_data = 0;
+int num_readers = 0;
+
+// Semaphores
+sem_t mutex;
+sem_t wrt;
+
+// Reader function
+void *reader(void *arg) {
+    int id = *(int*)arg;
+    int attempts = 0;
+
+    while (attempts < MAX_ATTEMPTS) {
+        // Entry section
+        sem_wait(&mutex);
+        num_readers++;
+        if (num_readers == 1) {
+            sem_wait(&wrt);
+        }
+        sem_post(&mutex);
+
+        // Critical section
+        printf("Reader %d read shared_data as %d\n", id, shared_data);
+
+        // Exit section
+        sem_wait(&mutex);
+        num_readers--;
+        if (num_readers == 0) {
+            sem_post(&wrt);
+        }
+        sem_post(&mutex);
+
+        attempts++;
+    }
+
+    pthread_exit(NULL);
+}
+
+// Writer function
+void *writer(void *arg) {
+    int id = *(int*)arg;
+    int attempts = 0;
+
+    while (attempts < MAX_ATTEMPTS) {
+        // Entry section
+        sem_wait(&wrt);
+
+        // Critical section
+        shared_data++;
+        printf("Writer %d wrote shared_data as %d\n", id, shared_data);
+
+        // Exit section
+        sem_post(&wrt);
+
+        attempts++;
+    }
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    // Initialize semaphores
+    sem_init(&mutex, 0, 1);
+    sem_init(&wrt, 0, 1);
+
+    // Create reader threads
+    pthread_t reader_threads[NUM_READERS];
+    int reader_ids[NUM_READERS];
+    for (int i = 0; i < NUM_READERS; i++) {
+        reader_ids[i] = i;
+        pthread_create(&reader_threads[i], NULL, reader, &reader_ids[i]);
+    }
+
+    // Create writer threads
+    pthread_t writer_threads[NUM_WRITERS];
+    int writer_ids[NUM_WRITERS];
+    for (int i = 0; i < NUM_WRITERS; i++) {
+        writer_ids[i] = i;
+        pthread_create(&writer_threads[i], NULL, writer, &writer_ids[i]);
+    }
+
+    // Wait for threads to finish
+    for (int i = 0; i < NUM_READERS; i++) {
+        pthread_join(reader_threads[i], NULL);
+    }
+    for (int i = 0; i < NUM_WRITERS; i++) {
+        pthread_join(writer_threads[i], NULL);
+    }
+
+    // Destroy semaphores
+    sem_destroy(&mutex);
+    sem_destroy(&wrt);
+
+    return 0;
+}
+
+
+
+
+//4. Program to Read from and Write to Files
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 1024
+
+int main() {
+    char buffer[BUFFER_SIZE];
+    int readFd, writeFd;
+    readFd = open("source.txt", O_RDONLY);
+    if (readFd == -1) {
+        perror("open");
+        return 1;
+    }
+    writeFd = open("destination.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (writeFd == -1) {
+        perror("open");
+        close(readFd);
+        return 1;
+    }
+    ssize_t bytesRead;
+    while ((bytesRead = read(readFd, buffer, BUFFER_SIZE)) > 0) {
+        write(writeFd, buffer, bytesRead);
+    }
+    close(readFd);
+    close(writeFd);
+    return 0;
+}
+
+
+
+//Create a C program using system calls that keeps reading from the console until the user types ’$’. Save the input data to a file called ’input.txt’.”
+
+
+
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+
+#define BUFFER_SIZE 1024
+
+int main() {
+    int fileDescriptor;
+    char buffer[BUFFER_SIZE];
+    char c;
+
+    fileDescriptor = open("input.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fileDescriptor == -1) {
+        perror("open");
+        return 1;
+    }
+
+    printf("Enter text (type '$' to finish): ");
+    while (1) {
+        ssize_t bytesRead = read(0, &c, 1);
+        if (bytesRead == -1) {
+            perror("read");
+            close(fileDescriptor);
+            return 1;
+        }
+        if (c == '$') {
+            break;
+        }
+        write(fileDescriptor, &c, 1);
+    }
+
+    close(fileDescriptor);
+    return 0;
+}
+
+
+
+
+
+//2. Program to Read from Console and Write to Console
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 1024
+
+int main() {
+    char buffer[BUFFER_SIZE];
+    // 0 is the file descriptor of standard input.
+    ssize_t bytesRead = read(0, buffer, BUFFER_SIZE);
+    if (bytesRead == -1) {
+        perror("read");
+        return 1;
+    }
+    write(1, buffer, bytesRead); // 1 is the file descriptor of standard output.
+    return 0;
+}
+
+
+
+#Write a shell script to reverse an array without using any inbuilt function?
+
+#!/bin/bash
+
+# Initialize an array
+arr=("apple" "banana" "cherry" "date" "elderberry")
+
+# Print the original array
+echo "Original array:"
+for i in "${arr[@]}"; do
+    echo "$i"
+done
+
+# Reverse the array
+for ((i=${#arr[@]}-1; i>=0; i--)); do
+    rev_arr[$(( ${#rev_arr[@]} ))]=${arr[$i]}
+done
+
+# Print the reversed array
+echo "Reversed array:"
+for i in "${rev_arr[@]}"; do
+    echo "$i"
+done
+
+
+
+
+//Q6 Write a C program to create 2 threads where one thread is printing the multiplication table and other thread is printing addition table of a number which is taken from user and is passed as an argument to the thread printing the tables and after the threads have done their job, main program should print a success message.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+void *multiplication_table(void *arg) {
+    int num = *((int *) arg);
+    for (int i = 1; i <= 10; i++) {
+        printf("%d x %d = %d\n", num, i, num * i);
+    }
+    return NULL;
+}
+
+void *addition_table(void *arg) {
+    int num = *((int *) arg);
+    for (int i = 1; i <= 10; i++) {
+        printf("%d + %d = %d\n", num, i, num + i);
+    }
+    return NULL;
+}
+
+int main() {
+    int num;
+    printf("Enter a number: ");
+    scanf("%d", &num);
+
+    pthread_t thread1, thread2;
+
+    // Create threads
+    pthread_create(&thread1, NULL, multiplication_table, (void *)&num);
+    pthread_create(&thread2, NULL, addition_table, (void *)&num);
+
+    // Wait for threads to finish
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    printf("Multiplication and addition tables have been printed successfully.\n");
+
+    return 0;
+}
+
+
+
+
+
+//Exercise 1: Develop a program using pthread to concatenate multiple strings passed to the thread function.
+
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
+
+void *concatenate_strings(void *arg) {
+    char **strings = (char **)arg;
+    int num_strings = *((int *)strings[-1]);
+    int len = 0;
+    for (int i = 0; i < num_strings; i++) {
+        len += strlen(strings[i]);
+    }
+    char *result = (char *)malloc(len + 1);
+    result[len] = '\0';
+    for (int i = 0; i < num_strings; i++) {
+        strcat(result, strings[i]);
+    }
+    return result;
+}
+
+int main() {
+    char *strings[] = {"Hello", " ", "World", "!"};
+    int num_strings = sizeof(strings) / sizeof(strings[0]) - 1;
+    pthread_t thread_id;
+    void *result;
+    pthread_create(&thread_id, NULL, concatenate_strings, &strings);
+    pthread_join(thread_id, &result);
+    printf("Concatenated string: %s\n", (char *)result);
+    free(result);
+    return 0;
+}
+
+
+
+//A C program using the pthread library to create a thread with NULL attributes
+
+
+#include <stdio.h>
+#include <pthread.h>
+
+void* thread_function(void* arg) {
+    printf("Inside the new thread!\n");
+    return NULL;
+}
+
+int main() {
+    pthread_t thread_id;
+    pthread_create(&thread_id, NULL, thread_function, NULL);
+    pthread_join(thread_id, NULL);
+    return 0;
+}
+
+
+
+//Exercise 3: Implement a program that performs statistical operations (calculating average, max-imum, and minimum) for a set of numbers. Utilize three threads, where each thread performs its respective operation.
+
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+typedef struct {
+    int *numbers;
+    int num_numbers;
+    int *result;
+} stats_args;
+
+void *calculate_average(void *arg) {
+    stats_args *args = (stats_args *)arg;
+    int sum = 0;
+    for (int i = 0; i < args->num_numbers; i++) {
+        sum += args->numbers[i];
+    }
+    *args->result = sum / args->num_numbers;
+    return NULL;
+}
+
+void *calculate_maximum(void *arg) {
+    stats_args *args = (stats_args *)arg;
+    int max = args->numbers[0];
+    for (int i = 1; i < args->num_numbers; i++) {
+        if (args->numbers[i] > max) {
+            max = args->numbers[i];
+        }
+    }
+    *args->result = max;
+    return NULL;
+}
+
+void *calculate_minimum(void *arg) {
+    stats_args *args = (stats_args *)arg;
+    int min = args->numbers[0];
+    for (int i = 1; i < args->num_numbers; i++) {
+        if (args->numbers[i] < min) {
+            min = args->numbers[i];
+        }
+    }
+    *args->result = min;
+    return NULL;
+}
+
+int main() {
+    int numbers[] = {1, 2, 3, 4, 5};
+    int num_numbers = sizeof(numbers) / sizeof(numbers[0]);
+    int results[3];
+    stats_
+
+
+
+
+
+
+//A C program where a thread returns a value to the main function using pointers:
+
+#include <stdio.h>
+#include <pthread.h>
+#define NUM_THREADS 1
+
+void* thread_function(void* arg) {
+    int* return_value = malloc(sizeof(int));
+    *return_value = 143; // Set the return value
+    pthread_exit(return_value);
+}
+
+int main() {
+    pthread_t thread_ids[NUM_THREADS];
+    int* thread_return;
+
+    pthread_create(&thread_ids[0], NULL, thread_function, NULL);
+    pthread_join(thread_ids[0], (void**)&thread_return);
+    printf("Value returned from thread: %d\n", *thread_return);
+    free(thread_return); // Free allocated memory for return value
+    return 0;
+}
+
+
+
+
+
+
+//C program to demonstrate the creation of a Zombie process:
+
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int main() {
+    pid_t child_pid = fork();
+
+    if (child_pid == 0) {
+        // Child process
+        printf("Child process : PID = %d\n", getpid());
+        exit(0); // Child process exits immediately
+    } else if (child_pid > 0) {
+        // Parent process
+        printf("Parent process : PID = %d\n", getpid());
+        printf("Parent process : Child PID = %d\n", child_pid);
+        sleep(10); // Sleep to allow time for the child to become a zombie
+        printf("Parent process : Terminating . . . \n");
+    } else {
+        printf("Fork failed\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+
